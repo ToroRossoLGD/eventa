@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('Detalji porudžbine')}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <main class="container page-space narrow">
+      <a class="back-link" th:href="@{/orders}">← Moje ulaznice</a>
+      <div th:replace="~{fragments :: alerts}"></div>
+      <span class="eyebrow" th:text="'PORUDŽBINA #' + ${order.id}"></span>
+      <h1 th:text="${order.event.title}"></h1>
+      <p
+        class="lead"
+        th:text="${#temporals.format(order.event.startsAt,'dd.MM.yyyy. · HH:mm')} + ' · ' + ${order.event.venue.name}"
+      ></p>
+      <div class="order-toolbar">
+        <span class="badge" th:text="${statusLabels[order.status]}"></span
+        ><strong
+          th:text="'Ukupno: ' + ${#numbers.formatDecimal(order.total,1,'POINT',2,'COMMA')} + ' RSD'"
+        ></strong
+        ><button class="button outline small" data-print>
+          Štampaj ulaznice ↗
+        </button>
+      </div>
+      <article class="admission-ticket" th:each="ticket:${tickets}">
+        <div class="ticket-main">
+          <span class="brand">eventa.</span
+          ><span
+            class="eyebrow"
+            th:text="${ticket.ticketType.name} + ' / JEDAN ULAZ'"
+          ></span>
+          <h2 th:text="${order.event.title}"></h2>
+          <p
+            th:text="${#temporals.format(order.event.startsAt,'dd.MM.yyyy. · HH:mm')}"
+          ></p>
+          <p
+            th:text="${order.event.venue.name} + ' · ' + ${order.event.venue.address}"
+          ></p>
+          <span class="badge" th:text="${statusLabels[ticket.status]}"></span>
+        </div>
+        <div class="ticket-stub">
+          <span class="eyebrow">TVOJ JEDINSTVENI KOD</span
+          ><strong class="ticket-code" th:text="${ticket.code}"></strong
+          ><button
+            class="button outline small"
+            th:attr="data-copy=${ticket.code}"
+          >
+            Kopiraj kod</button
+          ><small>Pokaži ovaj kod na ulazu.<br />Važi za jedan ulazak.</small>
+        </div>
+      </article>
+      <div class="info-box no-print">
+        <strong>Spreman za događaj?</strong>
+        <p>
+          Ulaz se evidentira od dva sata pre početka događaja. Kod ulaznice
+          čuvaj za sebe. Plaćanje u ovoj aplikaciji je simulirano.
+        </p>
+      </div>
+      <form
+        th:if="${canCancel}"
+        th:action="@{/orders/{id}/cancel(id=${order.id})}"
+        method="post"
+        data-confirm="Otkazati celu porudžbinu? Sve njene ulaznice prestaće da važe."
+        class="cancel-form no-print"
+      >
+        <button class="text-danger">Otkaži porudžbinu</button>
+      </form>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

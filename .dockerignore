@@ -1,0 +1,7 @@
+.tools
+.git
+target
+node_modules
+data
+artifacts
+.env

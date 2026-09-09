@@ -1,0 +1,92 @@
+<!doctype html>
+<html
+  lang="sr-Latn"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:fragment="head(title)">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f3ee" />
+    <meta
+      name="description"
+      content="Otkrijte događaje, pronađite svoj doživljaj i rezervišite mesto uz Eventu."
+    />
+    <title th:text="${title} + ' · Eventa'">Eventa</title>
+    <link rel="icon" th:href="@{/art/favicon.svg}" type="image/svg+xml" />
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <script defer th:src="@{/js/app.js}"></script>
+  </head>
+  <body>
+    <header th:fragment="header" class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" th:href="@{/}" aria-label="Eventa početna"
+          ><span class="brand-mark">e</span>eventa<span class="brand-dot"
+            >.</span
+          ></a
+        >
+        <nav class="main-nav" aria-label="Glavna navigacija">
+          <a th:href="@{/events}">Istraži događaje</a
+          ><a sec:authorize="isAuthenticated()" th:href="@{/orders}"
+            >Moje ulaznice</a
+          ><a sec:authorize="hasRole('ADMIN')" th:href="@{/admin}"
+            >Administracija</a
+          >
+        </nav>
+        <div class="nav-actions">
+          <a
+            sec:authorize="isAnonymous()"
+            th:href="@{/login}"
+            class="login-link"
+            >Prijavi se <span>↗</span></a
+          ><a
+            sec:authorize="isAnonymous()"
+            th:href="@{/register}"
+            class="button small dark"
+            >Napravi nalog</a
+          >
+          <form
+            sec:authorize="isAuthenticated()"
+            th:action="@{/logout}"
+            method="post"
+          >
+            <button class="button small outline">Odjavi se ↗</button>
+          </form>
+        </div>
+      </div>
+    </header>
+    <div th:fragment="alerts" class="alerts" aria-live="polite">
+      <div th:if="${success}" class="alert success" role="status">
+        <strong>✓</strong> <span th:text="${success}"></span>
+      </div>
+      <div th:if="${error}" class="alert error" role="alert">
+        <strong>!</strong> <span th:text="${error}"></span>
+      </div>
+    </div>
+    <footer th:fragment="footer" class="site-footer">
+      <div class="container footer-inner">
+        <a class="brand" th:href="@{/}"
+          >eventa<span class="brand-dot">.</span></a
+        >
+        <p>Manje skrolovanja. Više doživljaja.</p>
+        <span>Studentski projekat · ISA · 2026</span>
+      </div>
+    </footer>
+    <aside th:fragment="sidebar" class="sidebar">
+      <span class="eyebrow">RADNI PROSTOR</span
+      ><a th:href="@{/admin}" th:classappend="${resource == null} ? 'active'"
+        >◫ &nbsp; Pregled</a
+      ><a
+        th:each="r : ${resources}"
+        th:href="@{/admin/{key}(key=${r.key})}"
+        th:text="${r.label}"
+        th:classappend="${resource != null and resource.key == r.key} ? 'active'"
+      ></a>
+      <hr />
+      <a th:href="@{/admin/check-in}">↗ &nbsp; Provera ulaznica</a>
+      <div class="sidebar-note">
+        Sve na jednom mestu.<br /><strong>Vi stvarate doživljaje.</strong>
+      </div>
+    </aside>
+  </body>
+</html>

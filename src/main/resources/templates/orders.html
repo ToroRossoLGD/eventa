@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('Moje ulaznice')}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <main class="container page-space">
+      <span class="eyebrow">TVOJ KALENDAR DOŽIVLJAJA</span>
+      <h1>Moje ulaznice<span class="brand-dot">.</span></h1>
+      <p class="lead">Svi dobri planovi, na jednom mestu.</p>
+      <div th:replace="~{fragments :: alerts}"></div>
+      <div class="order-list">
+        <a
+          class="order-card"
+          th:each="order:${orders}"
+          th:href="@{/orders/{id}(id=${order.id})}"
+          ><div class="order-thumb" th:classappend="${order.event.theme}">
+            <img
+              th:src="@{/art/{theme}.svg(theme=${order.event.theme})}"
+              alt=""
+            />
+          </div>
+          <div class="order-info">
+            <span class="eyebrow" th:text="'PORUDŽBINA #' + ${order.id}"></span>
+            <h3 th:text="${order.event.title}"></h3>
+            <p
+              th:text="${#temporals.format(order.event.startsAt,'dd.MM.yyyy. · HH:mm')} + ' · ' + ${order.event.venue.city}"
+            ></p>
+          </div>
+          <div class="order-side">
+            <span
+              class="badge"
+              th:classappend="${order.status == 'CANCELLED'} ? 'muted'"
+              th:text="${statusLabels[order.status]}"
+            ></span
+            ><strong
+              th:text="${#numbers.formatDecimal(order.total,1,'POINT',2,'COMMA')} + ' RSD'"
+            ></strong
+            ><span>Prikaži ulaznice ↗</span>
+          </div></a
+        >
+      </div>
+      <div class="empty-state" th:if="${orders.isEmpty()}">
+        <span>♫</span>
+        <h2>Tvoj sledeći doživljaj tek počinje.</h2>
+        <p>Još nemaš kupljenih ulaznica. Pronađi događaj po svom ukusu.</p>
+        <a class="button dark" th:href="@{/events}">Istraži događaje ↗</a>
+      </div>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

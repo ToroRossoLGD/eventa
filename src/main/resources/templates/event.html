@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head(${event.title})}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <main class="container page-space">
+      <a class="back-link" th:href="@{/events}">← Svi događaji</a>
+      <div th:replace="~{fragments :: alerts}"></div>
+      <div class="detail-layout">
+        <article>
+          <div class="detail-art card-art" th:classappend="${event.theme}">
+            <img
+              th:src="@{/art/{theme}.svg(theme=${event.theme})}"
+              alt=""
+            /><span class="art-category" th:text="${event.category.name}"></span
+            ><span class="detail-poster" th:text="${event.title}"></span
+            ><span class="poster-index">EVENTA PRESENTS / DOŽIVI UŽIVO</span>
+          </div>
+          <div class="detail-copy">
+            <span class="eyebrow" th:text="${event.category.name}"></span>
+            <h1 th:text="${event.title}"></h1>
+            <div class="event-facts">
+              <span
+                >◷
+                <strong
+                  th:text="${#temporals.format(event.startsAt,'dd.MM.yyyy. · HH:mm')}"
+                ></strong></span
+              ><span
+                >⌖
+                <strong
+                  th:text="${event.venue.name} + ', ' + ${event.venue.city}"
+                ></strong
+              ></span>
+            </div>
+            <h2>O događaju</h2>
+            <p class="description" th:text="${event.description}"></p>
+            <div class="info-box">
+              <strong>Lokacija</strong>
+              <p th:text="${event.venue.name}"></p>
+              <span
+                th:text="${event.venue.address} + ', ' + ${event.venue.city}"
+              ></span>
+            </div>
+          </div>
+        </article>
+        <aside class="booking-panel">
+          <span class="eyebrow">TVOJE MESTO JE OVDE</span>
+          <h2>Izaberi ulaznicu</h2>
+          <p>Jedan korak bliže dobrom provodu.</p>
+          <div class="alert error" th:if="${!onSale}">
+            Prodaja je završena ili je događaj otkazan.
+          </div>
+          <div class="ticket-option" th:each="type:${types}">
+            <div>
+              <strong th:text="${type.name}"></strong
+              ><span
+                class="availability"
+                th:text="${remaining[type.id]} + ' ulaznica dostupno'"
+              ></span>
+            </div>
+            <div
+              class="ticket-price"
+              th:text="${#numbers.formatDecimal(type.price,1,'POINT',2,'COMMA')} + ' RSD'"
+            ></div>
+            <a
+              th:if="${onSale and remaining[type.id] > 0}"
+              class="button dark full"
+              th:href="@{/checkout/{id}(id=${type.id})}"
+              >Izaberi <span>↗</span></a
+            ><span
+              th:unless="${onSale and remaining[type.id] > 0}"
+              class="button disabled full"
+              th:text="${remaining[type.id] == 0 ? 'Rasprodato' : 'Prodaja zatvorena'}"
+            ></span>
+          </div>
+          <p th:if="${types.isEmpty()}">Ulaznice će uskoro biti dostupne.</p>
+          <div class="small-note">
+            ✓ &nbsp; Jedinstveni kod za svaku ulaznicu<br />✓ &nbsp; Ulaznice na
+            tvom nalogu<br />✓ &nbsp; Otkazivanje pre početka događaja
+          </div>
+        </aside>
+      </div>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

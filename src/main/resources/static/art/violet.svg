@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="b" x2="1" y2="1">
+      <stop stop-color="#766199" />
+      <stop offset="1" stop-color="#aa8bb8" />
+    </linearGradient>
+    <radialGradient id="o">
+      <stop stop-color="#e9b9cd" />
+      <stop offset=".55" stop-color="#c49bbb" />
+      <stop offset="1" stop-color="#82639c" />
+    </radialGradient>
+  </defs>
+  <path fill="url(#b)" d="M0 0h800v500H0z" />
+  <circle cx="590" cy="160" r="230" fill="url(#o)" />
+  <g fill="none" stroke="#efcadc" stroke-width="2" opacity=".5">
+    <ellipse
+      cx="560"
+      cy="170"
+      rx="200"
+      ry="90"
+      transform="rotate(-35 560 170)"
+    />
+    <ellipse
+      cx="560"
+      cy="170"
+      rx="225"
+      ry="125"
+      transform="rotate(-35 560 170)"
+    />
+    <ellipse
+      cx="560"
+      cy="170"
+      rx="252"
+      ry="160"
+      transform="rotate(-35 560 170)"
+    />
+    <ellipse
+      cx="560"
+      cy="170"
+      rx="280"
+      ry="200"
+      transform="rotate(-35 560 170)"
+    />
+    <ellipse
+      cx="560"
+      cy="170"
+      rx="310"
+      ry="245"
+      transform="rotate(-35 560 170)"
+    />
+  </g>
+  <path d="M0 460L800 10M0 480L800 30" stroke="#d5b4cb" opacity=".22" />
+</svg>

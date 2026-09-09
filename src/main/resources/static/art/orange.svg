@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="b" x2="1" y2="1">
+      <stop stop-color="#b96d48" />
+      <stop offset="1" stop-color="#e5a578" />
+    </linearGradient>
+    <linearGradient id="s">
+      <stop stop-color="#f3c994" />
+      <stop offset="1" stop-color="#a6593c" />
+    </linearGradient>
+  </defs>
+  <path fill="url(#b)" d="M0 0h800v500H0z" />
+  <g transform="translate(565 205) rotate(18)">
+    <path
+      d="M-190 170V-65a190 190 0 0 1 380 0v235h-60V-65a130 130 0 0 0-260 0v235z"
+      fill="url(#s)"
+    />
+    <path
+      d="M-105 170V-55a105 105 0 0 1 210 0v225H45V-55a45 45 0 0 0-90 0v225z"
+      fill="url(#s)"
+    />
+    <path
+      d="M-190 170V-65a190 190 0 0 1 380 0"
+      fill="none"
+      stroke="#f7d1a6"
+      opacity=".6"
+    />
+  </g>
+  <g fill="none" stroke="#ffdbb0" opacity=".3">
+    <path d="M0 470L800 340M0 445L800 315M0 420L800 290" />
+  </g>
+  <circle cx="120" cy="100" r="20" fill="#eecb93" opacity=".8" />
+</svg>

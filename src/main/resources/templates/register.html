@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('Registracija')}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <main class="auth-layout container">
+      <div class="auth-story">
+        <span class="eyebrow">NAPRAVI MESTO ZA DOŽIVLJAJE</span>
+        <h1>Više trenutaka.<br />Više <em>uspomena.</em></h1>
+        <p>
+          Pronađi ono što te pokreće.<br />Tvoj prvi dobar plan počinje ovde.
+        </p>
+        <span class="auth-star">✳</span>
+      </div>
+      <section class="auth-panel">
+        <h2>Napravi nalog</h2>
+        <p>Pridruži se i sačuvaj svoje mesto.</p>
+        <form
+          th:action="@{/register}"
+          th:object="${form}"
+          method="post"
+          class="stack-form"
+        >
+          <label
+            >Ime i prezime<input
+              th:field="*{name}"
+              required
+              maxlength="100"
+              autocomplete="name"
+              placeholder="Ana Petrović" /><small
+              class="field-error"
+              th:errors="*{name}"
+            ></small></label
+          ><label
+            >Email adresa<input
+              type="email"
+              th:field="*{email}"
+              required
+              maxlength="180"
+              autocomplete="email"
+              placeholder="ime@primer.rs" /><small
+              class="field-error"
+              th:errors="*{email}"
+            ></small></label
+          ><label
+            >Lozinka<input
+              type="password"
+              name="password"
+              required
+              minlength="8"
+              maxlength="60"
+              autocomplete="new-password"
+              placeholder="Najmanje 8 znakova" /><small
+              class="field-error"
+              th:errors="*{password}"
+            ></small></label
+          ><button class="button dark full">
+            Napravi nalog <span>↗</span>
+          </button>
+        </form>
+        <p class="auth-switch">
+          Već imaš nalog? <a th:href="@{/login}">Prijavi se.</a>
+        </p>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

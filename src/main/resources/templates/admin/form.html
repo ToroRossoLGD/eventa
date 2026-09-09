@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head(${resource.label})}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <div class="container admin-layout">
+      <aside th:replace="~{fragments :: sidebar}"></aside>
+      <main class="admin-main">
+        <a
+          class="back-link"
+          th:href="@{/admin/{key}(key=${resource.key})}"
+          th:text="'← '+${resource.label}"
+        ></a
+        ><span class="eyebrow">ADMINISTRACIJA / UREĐIVANJE</span>
+        <h1
+          th:text="${recordId == null ? 'Dodaj ' + resource.singular : 'Izmeni zapis #' + recordId}"
+        ></h1>
+        <p th:text="${resource.description}"></p>
+        <div th:replace="~{fragments :: alerts}"></div>
+        <form
+          class="panel stack-form admin-form"
+          th:action="@{/admin/{key}/save(key=${resource.key})}"
+          method="post"
+        >
+          <input
+            th:if="${recordId != null}"
+            type="hidden"
+            name="recordId"
+            th:value="${recordId}"
+          /><label th:each="field:${fields}"
+            ><span th:text="${field.label}"></span
+            ><textarea
+              th:if="${field.type == 'textarea'}"
+              th:name="${field.name}"
+              th:text="${field.value}"
+              th:required="${field.required}"
+              rows="5"
+            ></textarea
+            ><select
+              th:if="${field.type == 'select'}"
+              th:name="${field.name}"
+              th:required="${field.required}"
+            >
+              <option value="">Izaberite…</option>
+              <option
+                th:each="option:${field.options}"
+                th:value="${option.value}"
+                th:text="${option.label}"
+                th:selected="${option.value == field.value}"
+              ></option></select
+            ><input
+              th:unless="${field.type == 'textarea' or field.type == 'select'}"
+              th:type="${field.type == 'decimal' ? 'number' : field.type}"
+              th:name="${field.name}"
+              th:value="${field.value}"
+              th:required="${field.required}"
+              th:attr="step=${field.type == 'decimal' ? '0.01' : null},min=${field.type == 'decimal' ? '0' : (field.type == 'number' ? '1' : null)},autocomplete=${field.type == 'password' ? 'new-password' : null}" /><small
+              th:if="${!field.hint.isEmpty()}"
+              th:text="${field.hint}"
+            ></small
+          ></label>
+          <div
+            class="info-box"
+            th:if="${resource.key == 'orders' or resource.key == 'tickets'}"
+          >
+            Iznos i kodovi računaju se automatski. Otkazani zapisi ne mogu
+            ponovo postati važeći. Provera ulaska dostupna je od 2 sata pre do
+            12 sati posle početka događaja.
+          </div>
+          <div class="form-actions">
+            <button class="button dark">Sačuvaj promene ↗</button
+            ><a
+              class="button outline"
+              th:href="@{/admin/{key}(key=${resource.key})}"
+              >Odustani</a
+            >
+          </div>
+        </form>
+      </main>
+    </div>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

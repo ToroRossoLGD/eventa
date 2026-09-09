@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('Administracija')}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <div class="container admin-layout">
+      <aside th:replace="~{fragments :: sidebar}"></aside>
+      <main class="admin-main">
+        <span class="eyebrow">ADMINISTRACIJA</span>
+        <div class="section-heading">
+          <div>
+            <h1>
+              Dobar pregled.<br />Još bolji događaji<span class="brand-dot"
+                >.</span
+              >
+            </h1>
+            <p>Upravljaj programom i prati sve što se dešava.</p>
+          </div>
+          <a class="button dark" th:href="@{/admin/events/new}"
+            >+ Novi događaj</a
+          >
+        </div>
+        <div th:replace="~{fragments :: alerts}"></div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>Događaji</span><strong th:text="${eventCount}"></strong
+            ><small>u evidenciji</small>
+          </div>
+          <div class="stat-card">
+            <span>Prodate ulaznice</span
+            ><strong th:text="${ticketCount}"></strong
+            ><small>važeće i iskorišćene</small>
+          </div>
+          <div class="stat-card">
+            <span>Prihod · RSD</span
+            ><strong
+              th:text="${#numbers.formatDecimal(revenue,1,'POINT',0,'COMMA')}"
+            ></strong
+            ><small>simulirana prodaja</small>
+          </div>
+          <div class="stat-card">
+            <span>Korisnici</span><strong th:text="${userCount}"></strong
+            ><small>registrovanih naloga</small>
+          </div>
+        </div>
+        <div class="section-heading">
+          <h2>Poslednje porudžbine</h2>
+          <a class="inline-link" th:href="@{/admin/orders}"
+            >Sve porudžbine ↗</a
+          >
+        </div>
+        <div class="panel table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Broj</th>
+                <th>Događaj / kupac</th>
+                <th>Iznos</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="o:${recent}">
+                <td>
+                  <a
+                    th:href="@{/admin/orders/{id}/edit(id=${o.id})}"
+                    th:text="'#'+${o.id}"
+                  ></a>
+                </td>
+                <td>
+                  <strong th:text="${o.event.title}"></strong
+                  ><small class="table-sub" th:text="${o.user.email}"></small>
+                </td>
+                <td
+                  th:text="${#numbers.formatDecimal(o.total,1,'POINT',2,'COMMA')}+' RSD'"
+                ></td>
+                <td>
+                  <span
+                    class="badge"
+                    th:text="${statusLabels[o.status]}"
+                  ></span>
+                </td>
+              </tr>
+              <tr th:if="${recent.isEmpty()}">
+                <td colspan="4" class="empty-cell">
+                  Još nema porudžbina. Prva prodaja počinje dobrim događajem.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <a class="checkin-banner" th:href="@{/admin/check-in}"
+          ><span>↗</span>
+          <div>
+            <h3>Vrata su otvorena.</h3>
+            <p>Proveri kod ulaznice i evidentiraj ulazak posetioca.</p>
+          </div>
+          <strong>Provera ulaznica →</strong></a
+        >
+      </main>
+    </div>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

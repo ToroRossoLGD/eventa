@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head
+    th:replace="~{fragments :: head('Pronađi svoj sledeći doživljaj')}"
+  ></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <main class="container">
+      <div th:replace="~{fragments :: alerts}"></div>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"
+            ><span class="live-dot"></span> TVOJ SLEDEĆI DOBAR PLAN</span
+          >
+          <h1>Ne propusti<br />ono što se <em>pamti.</em></h1>
+          <p>
+            Koncerti koji te pokrenu. Ideje koje te inspirišu.<br />Pronađi svoj
+            sledeći doživljaj — mi čuvamo mesto.
+          </p>
+          <a href="#dogadjaji" class="button dark"
+            >Istraži događaje <span>↗</span></a
+          >
+          <div class="hero-proof">
+            <div class="mini-avatars">
+              <span>♫</span><span>✦</span><span>↗</span>
+            </div>
+            <span
+              ><strong>Za svaki tvoj ritam.</strong><br />Muzika, kultura i nove
+              ideje.</span
+            >
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="hero-sticker">
+            BUDI<br /><strong>TAMO.</strong><span>✳</span>
+          </div>
+          <div class="floating-label">
+            <span class="live-dot"></span> Uspomene počinju ovde
+          </div>
+          <span class="art-coordinate">44°48′ N &nbsp; 20°28′ E</span
+          ><span class="art-caption">GOOD TIMES / REAL CONNECTIONS</span>
+        </div>
+      </section>
+      <section id="dogadjaji" class="catalog">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">IZAĐI IZ SVAKODNEVICE</span>
+            <h2>Pronađi svoj događaj<span class="brand-dot">.</span></h2>
+          </div>
+          <span
+            class="count-label"
+            th:text="${eventCount} + ' događaja u najavi'"
+            >6 događaja u najavi</span
+          >
+        </div>
+        <form class="search-bar" th:action="@{/events}" method="get">
+          <label class="search-input"
+            ><span>⌕</span
+            ><input
+              type="search"
+              name="q"
+              th:value="${q}"
+              placeholder="Naziv događaja, izvođač ili ključna reč…"
+              aria-label="Pretraga događaja" /></label
+          ><label class="city-select"
+            ><span>⌖</span
+            ><select name="city" aria-label="Grad">
+              <option value="">Svi gradovi</option>
+              <option
+                th:each="c:${cities}"
+                th:value="${c}"
+                th:text="${c}"
+                th:selected="${c == selectedCity}"
+              ></option></select></label
+          ><input
+            th:if="${selectedCategory != null}"
+            type="hidden"
+            name="category"
+            th:value="${selectedCategory}"
+          /><button class="button dark">Pretraži <span>↗</span></button>
+        </form>
+        <div class="category-row">
+          <a
+            class="chip"
+            th:classappend="${selectedCategory == null} ? 'selected'"
+            th:href="@{/events(q=${q},city=${selectedCity})}"
+            >✳ &nbsp; Sve kategorije</a
+          ><a
+            class="chip"
+            th:each="c:${categories}"
+            th:text="${c.name}"
+            th:classappend="${c.id == selectedCategory} ? 'selected'"
+            th:href="@{/events(category=${c.id},q=${q},city=${selectedCity})}"
+          ></a>
+        </div>
+        <div class="event-grid" th:if="${!cards.isEmpty()}">
+          <a
+            class="event-card"
+            th:each="card:${cards}"
+            th:href="@{/events/{id}(id=${card.event.id})}"
+            ><div class="card-art" th:classappend="${card.event.theme}">
+              <img
+                th:src="@{/art/{theme}.svg(theme=${card.event.theme})}"
+                alt=""
+                loading="lazy"
+              /><span
+                class="art-category"
+                th:text="${card.event.category.name}"
+              ></span
+              ><span class="date-badge"
+                ><strong
+                  th:text="${#temporals.format(card.event.startsAt,'dd')}"
+                ></strong
+                ><span
+                  th:text="${#temporals.format(card.event.startsAt,'MM / yyyy')}"
+                ></span></span
+              ><span
+                class="poster-word"
+                th:text="${card.event.category.name == 'Muzika' ? 'FEEL THE SOUND.' : (card.event.category.name == 'Kultura' ? 'A NEW PERSPECTIVE.' : 'BE PART OF IT.')}"
+              ></span
+              ><span
+                class="poster-index"
+                th:text="'EVENTA / 0' + ${card.event.id}"
+              ></span>
+            </div>
+            <div class="card-body">
+              <span
+                class="card-meta"
+                th:text="${card.event.venue.city} + ' · ' + ${#temporals.format(card.event.startsAt,'HH:mm')} + ' h'"
+              ></span>
+              <h3 th:text="${card.event.title}"></h3>
+              <p
+                class="venue-line"
+                th:text="'⌖ ' + ${card.event.venue.name}"
+              ></p>
+              <div class="card-bottom">
+                <span th:if="${card.available > 0}"
+                  >od
+                  <strong
+                    th:text="${#numbers.formatDecimal(card.price,1,'POINT',0,'COMMA')} + ' RSD'"
+                  ></strong></span
+                ><strong th:if="${card.available == 0}">Rasprodato</strong
+                ><span class="circle-arrow">↗</span>
+              </div>
+            </div></a
+          >
+        </div>
+        <div class="empty-state" th:if="${cards.isEmpty()}">
+          <span>⌕</span>
+          <h3>Nismo pronašli takav događaj.</h3>
+          <p>Promeni pretragu ili pogledaj sve događaje u najavi.</p>
+          <a class="button outline" th:href="@{/events}"
+            >Prikaži sve događaje</a
+          >
+        </div>
+      </section>
+      <section class="bottom-banner">
+        <span class="banner-star">✳</span>
+        <div>
+          <h2>Dobar plan zaslužuje svoje mesto.</h2>
+          <p>Izaberi događaj. Preuzmi ulaznicu. Stvori uspomenu.</p>
+        </div>
+        <a class="button dark" href="#dogadjaji">Pronađi svoj plan ↗</a>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

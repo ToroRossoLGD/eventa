@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: eventa
+      MYSQL_USER: eventa
+      MYSQL_PASSWORD: ${DB_PASSWORD:-eventa_local_demo}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-eventa_root_local_demo}
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - eventa_mysql:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  app:
+    build: .
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      DB_URL: jdbc:mysql://db:3306/eventa?connectionTimeZone=Europe/Belgrade&allowPublicKeyRetrieval=true&useSSL=false
+      DB_USER: eventa
+      DB_PASSWORD: ${DB_PASSWORD:-eventa_local_demo}
+      APP_SEED: "true"
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  eventa_mysql:

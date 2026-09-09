@@ -1,0 +1,13 @@
+{
+  "name": "eventa-browser-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser verification for the Spring MVC Eventa application",
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.60.0",
+    "prettier": "3.6.2"
+  }
+}

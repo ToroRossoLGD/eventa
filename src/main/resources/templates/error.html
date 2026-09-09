@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('Stranica nije dostupna')}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <main class="container page-space">
+      <div class="empty-state">
+        <span th:text="${status != null ? status : '…'}"></span>
+        <h1>Ovaj plan trenutno nije dostupan.</h1>
+        <p
+          th:text="${status == 403 ? 'Nemate dozvolu za pristup ovoj stranici ili je sesija istekla.' : (status == 404 ? 'Stranica koju tražite ne postoji.' : 'Vratite se na početnu stranicu i pokušajte ponovo.')}"
+        ></p>
+        <a class="button dark" th:href="@{/}">Nazad na događaje ↗</a>
+      </div>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

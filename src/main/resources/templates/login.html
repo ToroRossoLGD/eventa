@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('Prijava')}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <main class="auth-layout container">
+      <div class="auth-story">
+        <span class="eyebrow">DOBRO DOŠAO NAZAD</span>
+        <h1>Tvoj sledeći<br />doživljaj je<br /><em>iza ugla.</em></h1>
+        <p>Sve tvoje ulaznice. Svi tvoji planovi.<br />Na jednom mestu.</p>
+        <span class="auth-star">✳</span>
+      </div>
+      <section class="auth-panel">
+        <h2>Prijavi se</h2>
+        <p>Nastavi tamo gde počinju dobri planovi.</p>
+        <div th:replace="~{fragments :: alerts}"></div>
+        <div class="alert error" th:if="${param.error}">
+          Email ili lozinka nisu ispravni.
+        </div>
+        <div class="alert success" th:if="${param.logout}">
+          Uspešno ste se odjavili.
+        </div>
+        <form th:action="@{/login}" method="post" class="stack-form">
+          <label
+            >Email adresa<input
+              type="email"
+              name="email"
+              required
+              maxlength="180"
+              autocomplete="username"
+              placeholder="ime@primer.rs" /></label
+          ><label
+            >Lozinka<input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              placeholder="Unesite lozinku" /></label
+          ><button class="button dark full">Prijavi se <span>↗</span></button>
+        </form>
+        <p class="auth-switch">
+          Nemaš nalog? <a th:href="@{/register}">Napravi ga ovde.</a>
+        </p>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

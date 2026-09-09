@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head(${resource.label})}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <div class="container admin-layout">
+      <aside th:replace="~{fragments :: sidebar}"></aside>
+      <main class="admin-main">
+        <span class="eyebrow">ADMINISTRACIJA / EVIDENCIJA</span>
+        <div class="section-heading">
+          <div>
+            <h1 th:text="${resource.label}"></h1>
+            <p th:text="${resource.description}"></p>
+          </div>
+          <a
+            class="button dark"
+            th:href="@{/admin/{key}/new(key=${resource.key})}"
+            th:text="'+ Dodaj ' + ${resource.singular}"
+          ></a>
+        </div>
+        <div th:replace="~{fragments :: alerts}"></div>
+        <div class="admin-list-tools">
+          <span th:text="${rows.size()}+' zapisa'"></span
+          ><input
+            type="search"
+            id="table-search"
+            placeholder="Pretraži evidenciju…"
+            aria-label="Pretraži evidenciju"
+          />
+        </div>
+        <div class="panel table-wrap">
+          <table id="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th th:each="h:${headers}" th:text="${h}"></th>
+                <th>Akcije</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="row:${rows}">
+                <td th:text="'#'+${row.id}"></td>
+                <td th:each="cell:${row.cells}" th:text="${cell}"></td>
+                <td>
+                  <div class="row-actions">
+                    <a
+                      class="inline-link"
+                      th:href="@{/admin/{key}/{id}/edit(key=${resource.key},id=${row.id})}"
+                      >Izmeni</a
+                    >
+                    <form
+                      th:action="@{/admin/{key}/{id}/delete(key=${resource.key},id=${row.id})}"
+                      method="post"
+                      data-confirm="Obrisati ovaj zapis? Ova radnja se ne može poništiti."
+                    >
+                      <button class="text-danger">Obriši</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${rows.isEmpty()}">
+                <td th:colspan="${headers.size()+2}" class="empty-cell">
+                  Evidencija je prazna. Dodaj prvi zapis.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p id="no-table-results" class="empty-cell" hidden>
+            Nema rezultata za unetu pretragu.
+          </p>
+        </div>
+      </main>
+    </div>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

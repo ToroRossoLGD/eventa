@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="sr-Latn" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('Provera ulaznica')}"></head>
+  <body>
+    <header th:replace="~{fragments :: header}"></header>
+    <div class="container admin-layout">
+      <aside th:replace="~{fragments :: sidebar}"></aside>
+      <main class="admin-main">
+        <span class="eyebrow">DOBRO DOŠLI NA DOGAĐAJ</span>
+        <h1>Jedan kod. Jedan ulaz<span class="brand-dot">.</span></h1>
+        <p>Proveri ulaznicu i evidentiraj dolazak posetioca.</p>
+        <div th:replace="~{fragments :: alerts}"></div>
+        <section class="panel checkin-panel">
+          <span class="checkin-symbol">↗</span>
+          <h2>Provera ulaznice</h2>
+          <p>Unesi jedinstveni kod sa ulaznice posetioca.</p>
+          <form class="stack-form" th:action="@{/admin/check-in}" method="post">
+            <label
+              >Kod ulaznice<input
+                name="code"
+                required
+                maxlength="36"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                autocomplete="off"
+                autofocus /></label
+            ><button class="button dark full">
+              Proveri i evidentiraj ulaz ↗
+            </button>
+          </form>
+          <p class="small-note">
+            Uspešna provera označava ulaznicu kao iskorišćenu.<br />Ponovni
+            ulazak sa istim kodom nije moguć.
+          </p>
+        </section>
+      </main>
+    </div>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>
