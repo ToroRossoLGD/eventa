@@ -1,7 +1,5 @@
 # Eventa — organizacija događaja i prodaja ulaznica
 
-Studentski projekat za predmet **Internet softverske arhitekture**. Spring MVC aplikacija sa korisničkim delom, administratorskim panelom i sedam povezanih poslovnih tabela.
-
 Provereno: **21 integracioni test na H2, istih 21 na MySQL i 3 Chromium E2E testa**. Docker aplikacija je izgrađena i pokrenuta sa MySQL-om.
 
 ![Početna stranica aplikacije Eventa](docs/images/pocetna.png)
