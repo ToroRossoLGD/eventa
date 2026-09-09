@@ -3,7 +3,7 @@
 **Predmet:** Internet softverske arhitekture  
 **Tema:** Sistem za organizaciju događaja i prodaju ulaznica — Eventa  
 **Vrsta realizacije:** Spring MVC aplikacija sa CRUD operacijama i relacionom bazom  
-**Autor i broj indeksa:** dopuniti pre predaje  
+**Autor i broj indeksa:** Uroš Jović 2021/203641
 **Godina:** 2026.
 
 ## 1. Cilj i obim
