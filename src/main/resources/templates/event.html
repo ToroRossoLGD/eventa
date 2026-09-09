@@ -34,6 +34,13 @@
             </div>
             <h2>O događaju</h2>
             <p class="description" th:text="${event.description}"></p>
+            <section th:if="${!organizers.isEmpty()}" class="event-organizers">
+              <h2>Organizatori</h2>
+              <p th:each="organizer:${organizers}">
+                <strong th:text="${organizer.name}"></strong>
+                <span th:text="${organizer.email}"></span>
+              </p>
+            </section>
             <div class="info-box">
               <strong>Lokacija</strong>
               <p th:text="${event.venue.name}"></p>

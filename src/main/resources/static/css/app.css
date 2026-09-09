@@ -1,3 +1,26 @@
+.organizer-picker {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 16px;
+}
+.stack-form .organizer-picker label {
+  flex-direction: row;
+  align-items: center;
+  margin: 10px 0;
+}
+.stack-form .organizer-picker input {
+  width: auto;
+}
+.event-organizers {
+  margin-bottom: 25px;
+}
+.event-organizers p {
+  margin-bottom: 12px;
+}
+.event-organizers span {
+  display: block;
+  font-size: 13px;
+}
 :root {
   --bg: #f5f3ee;
   --paper: #fffefa;

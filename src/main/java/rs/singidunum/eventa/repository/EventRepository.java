@@ -10,6 +10,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByOrderByStartsAtAsc();
     boolean existsByVenueId(Long id);
     boolean existsByCategoryId(Long id);
+    boolean existsByOrganizersId(Long id);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from Event e where e.id = :id")
     Optional<Event> lockById(@Param("id") Long id);

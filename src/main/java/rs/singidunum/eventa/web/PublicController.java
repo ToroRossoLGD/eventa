@@ -24,6 +24,7 @@ public class PublicController {
     private final TicketRepository tickets;
     private final BookingService booking;
     private final AccountService accounts;
+    private final OrganizerRepository organizers;
 
     public record EventCard(Event event, BigDecimal price, long available) {}
     private EventCard card(Event event) {
@@ -51,6 +52,7 @@ public class PublicController {
 
     @GetMapping("/events/{id}")
     String event(@PathVariable Long id, Model model) {
+        model.addAttribute("organizers",organizers.findByEventsIdOrderByNameAscIdAsc(id));
         Event event = events.findById(id).orElseThrow(NotFoundException::new);
         List<TicketType> list = types.findByEventIdOrderByPriceAsc(id);
         Map<Long,Long> remaining = new HashMap<>(); list.forEach(t -> remaining.put(t.getId(), booking.remaining(t)));

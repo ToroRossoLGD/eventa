@@ -16,6 +16,7 @@ public class AdminService {
     private final AppUserRepository users;
     private final VenueRepository venues;
     private final CategoryRepository categories;
+    private final OrganizerRepository organizers;
     private final EventRepository events;
     private final TicketTypeRepository types;
     private final PurchaseOrderRepository orders;
@@ -29,6 +30,7 @@ public class AdminService {
     public record Field(String name,String label,String type,String value,List<Option> options,boolean required,String hint) {}
     public record Row(Long id,List<String> cells) {}
     public List<Resource> resources() { return List.of(
+        new Resource("organizers","Organizatori","organizatora","Organizatori i kontakti događaja."),
         new Resource("events","Događaji","događaj","Program, termini i status prodaje."),
         new Resource("venues","Lokacije","lokaciju","Prostori u kojima nastaju doživljaji."),
         new Resource("categories","Kategorije","kategoriju","Organizujte događaje po interesovanjima."),
@@ -38,6 +40,7 @@ public class AdminService {
         new Resource("tickets","Ulaznice","ulaznicu","Jedinstveni kodovi i evidencija ulaska.")); }
     public Resource resource(String key) { return resources().stream().filter(r -> r.key().equals(key)).findFirst().orElseThrow(NotFoundException::new); }
     public List<String> headers(String key) { return switch(key) {
+        case "organizers" -> List.of("Naziv","Email");
         case "events" -> List.of("Naziv","Termin","Lokacija","Status");
         case "venues" -> List.of("Naziv","Adresa","Grad","Kapacitet");
         case "categories" -> List.of("Naziv","Opis");
@@ -50,6 +53,7 @@ public class AdminService {
         case "PAID" -> "Plaćeno"; case "CANCELLED" -> "Otkazano"; case "PUBLISHED" -> "U prodaji";
         case "ACTIVE" -> "Važeća"; case "USED" -> "Iskorišćena"; case "ADMIN" -> "Administrator"; default -> "Posetilac"; }; }
     public List<Row> rows(String key) { return switch(key) {
+        case "organizers" -> organizers.findAllByOrderByNameAscIdAsc().stream().map(o -> new Row(o.getId(),List.of(o.getName(),o.getEmail()))).toList();
         case "events" -> events.findAllByOrderByStartsAtAsc().stream().map(e -> new Row(e.getId(),List.of(e.getTitle(),e.getStartsAt().format(DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm")),e.getVenue().getName(),label(e.getStatus())))).toList();
         case "venues" -> venues.findAll().stream().map(v -> new Row(v.getId(),List.of(v.getName(),v.getAddress(),v.getCity(),""+v.getCapacity()))).toList();
         case "categories" -> categories.findAll().stream().map(c -> new Row(c.getId(),List.of(c.getName(),c.getDescription()))).toList();
@@ -67,6 +71,8 @@ public class AdminService {
     public List<Field> fields(String key, Long id) {
         boolean edit=id!=null;
         return switch(key) {
+            case "organizers" -> { Organizer o=edit?organizers.findById(id).orElseThrow(NotFoundException::new):new Organizer();
+                yield List.of(field("name","Naziv","text",o.getName()),field("email","Email","email",o.getEmail())); }
             case "users" -> { AppUser u=edit?users.findById(id).orElseThrow(NotFoundException::new):new AppUser();
                 yield List.of(field("name","Ime i prezime","text",u.getName()),field("email","Email","email",u.getEmail()),
                     new Field("password","Lozinka","password","",List.of(),!edit,edit?"Ostavite prazno da zadržite postojeću lozinku.":"Od 8 do 60 znakova."),select("role","Uloga",u.getRole(),statuses("USER","ADMIN"))); }
@@ -107,8 +113,19 @@ public class AdminService {
 
     @Transactional
     public void save(String key,Long recordId,Map<String,String> data,String currentEmail) {
+        save(key, recordId, data, currentEmail, null);
+    }
+
+    @Transactional
+    public void save(String key,Long recordId,Map<String,String> data,String currentEmail,List<Long> organizerIds) {
         boolean edit=recordId!=null;
         switch(key) {
+            case "organizers" -> {
+                Organizer organizer=edit?organizers.findById(recordId).orElseThrow(NotFoundException::new):new Organizer();
+                String email=text(data,"email",180).toLowerCase(Locale.ROOT);
+                if(!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) throw new BusinessException("Email adresa nije ispravna.");
+                organizer.setName(text(data,"name",100)); organizer.setEmail(email); organizers.save(organizer);
+            }
             case "users" -> {
                 // Lock all administrator rows in stable order to preserve the last-admin invariant.
                 users.findAll().stream().filter(u -> u.getRole().equals("ADMIN")).sorted(Comparator.comparing(AppUser::getId)).forEach(u -> em.lock(u,jakarta.persistence.LockModeType.PESSIMISTIC_WRITE));
@@ -152,6 +169,13 @@ public class AdminService {
                 e.setCategory(categories.findById(id(data,"categoryId")).orElseThrow(NotFoundException::new));
                 e.setTheme(choice(data,"theme","violet","orange","blue","green"));
                 if(edit && status.equals("CANCELLED")) booking.cancelEvent(e); else e.setStatus(status);
+                if (organizerIds != null) {
+                    Set<Long> selected = new LinkedHashSet<>(organizerIds);
+                    List<Organizer> found = organizers.findAllById(selected);
+                    if (found.size() != selected.size()) throw new BusinessException("Izabrani organizator više ne postoji.");
+                    e.getOrganizers().clear();
+                    e.getOrganizers().addAll(found);
+                }
                 events.save(e);
             }
             case "types" -> {
@@ -189,6 +213,10 @@ public class AdminService {
     @Transactional
     public void delete(String key,Long id,String currentEmail) {
         switch(key) {
+            case "organizers" -> {
+                if(events.existsByOrganizersId(id)) throw new BusinessException("Organizator je povezan sa događajima. Prvo uklonite te veze.");
+                organizers.deleteById(id);
+            }
             case "users" -> { AppUser u=users.findById(id).orElseThrow(NotFoundException::new);
                 if(u.getEmail().equals(currentEmail)) throw new BusinessException("Ne možete obrisati sopstveni nalog.");
                 if(u.getRole().equals("ADMIN") && users.countByRole("ADMIN")<=1) throw new BusinessException("Poslednji administrator ne može biti obrisan.");

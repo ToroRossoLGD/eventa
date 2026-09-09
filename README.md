@@ -1,8 +1,8 @@
 # Eventa — organizacija događaja i prodaja ulaznica
 
-Studentski projekat za predmet **Internet softverske arhitekture**. Spring MVC aplikacija sa korisničkim delom, administratorskim panelom i sedam povezanih poslovnih tabela.
+Studentski projekat za predmet **Internet softverske arhitekture**. Spring MVC aplikacija sa korisničkim delom, administratorskim panelom, osam poslovnih tabela i spojnom tabelom za događaje i organizatore.
 
-Provereno: **21 integracioni test na H2, istih 21 na MySQL i 3 Chromium E2E testa**. Docker aplikacija je izgrađena i pokrenuta sa MySQL-om.
+Provereno: **24 integraciona testa na H2, istih 24 na MySQL i 4 Chromium E2E testa**. Docker aplikacija je izgrađena i pokrenuta sa MySQL-om.
 
 ![Početna stranica aplikacije Eventa](docs/images/pocetna.png)
 
@@ -64,9 +64,11 @@ $env:APP_SEED='true'
 powershell -ExecutionPolicy Bypass -File scripts/start.ps1 -Profile mysql
 ```
 
-Za već instalirani MySQL prvo napravite praznu bazu i korisnika, zatim prilagodite `DB_URL`, `DB_USER`, `DB_PASSWORD`. Šemu automatski pravi **Flyway** iz `src/main/resources/db/migration/V1__initial_schema.sql`; Hibernate je samo proverava (`ddl-auto=validate`). Demo H2 i MySQL koriste istu migraciju. Flyway dodaje i svoju tehničku tabelu istorije migracija, pored sedam poslovnih tabela.
+Za već instalirani MySQL prvo napravite praznu bazu i korisnika, zatim prilagodite `DB_URL`, `DB_USER`, `DB_PASSWORD`. Šemu automatski pravi **Flyway** iz verzionisanih SQL datoteka u `src/main/resources/db/migration/`; Hibernate je samo proverava (`ddl-auto=validate`). Demo H2 i MySQL koriste istu migraciju. Flyway dodaje i svoju tehničku tabelu istorije migracija, pored osam poslovnih tabela i spojne tabele `event_organizers`.
 
 ## Funkcionalnosti
+
+- ManyToMany veza događaja i organizatora preko `event_organizers`: više organizatora po događaju i više događaja po organizatoru. Izbor se uređuje čekiranjem u formi događaja; javni detalji prikazuju organizatore i kontakte. Povezani organizator se prvo uklanja sa događaja, pa se može obrisati.
 
 - Katalog događaja sa pretragom po tekstu, kategoriji i gradu.
 - Detalji događaja, lokacija, datum i dostupne Standard/VIP ulaznice.
@@ -74,7 +76,7 @@ Za već instalirani MySQL prvo napravite praznu bazu i korisnika, zatim prilagod
 - Kupovina 1–10 ulaznica po porudžbini, server računa cenu.
 - Jedinstveni UUID kod svake ulaznice, pregled i štampa/PDF iz pregledača.
 - Pregled sopstvenih porudžbina i otkazivanje pre početka događaja.
-- CRUD za korisnike, lokacije, kategorije, događaje, tipove ulaznica, porudžbine i ulaznice.
+- CRUD za korisnike, lokacije, kategorije, događaje, tipove ulaznica, porudžbine, ulaznice i organizatore.
 - Administratorska kontrolna tabla: događaji, korisnici, prodate ulaznice i simulirani prihod.
 - Provera koda i jednokratna evidencija ulaska, od dva sata pre do 12 sati posle početka.
 - Transakcije i zaključavanje događaja za zaštitu od prekomerne prodaje i dvostrukog ulaska.
@@ -108,7 +110,7 @@ Isti testovi podržavaju MySQL kroz `TEST_DB_URL`, `TEST_DB_USER`, `TEST_DB_PASS
 ```text
 src/main/java/rs/singidunum/eventa/
   config/       Spring Security i demo podaci
-  domain/       Sedam JPA entiteta
+  domain/       Osam JPA entiteta
   repository/   Spring Data JPA repozitorijumi
   service/      Kupovina, administracija i nalozi
   web/          MVC kontroleri, registracija i obrada grešaka
@@ -117,10 +119,10 @@ src/main/resources/
   templates/    Thymeleaf stranice i fragmenti
   static/       CSS, JavaScript i SVG ilustracije
 src/test/       Integracioni testovi
-docs/           Projektna dokumentacija i priprema odbrane
+docs/           Projektna dokumentacija
 scripts/        Priprema okruženja i pokretanje
 ```
 
-Detaljno: [Projektna dokumentacija](docs/PROJEKTNA_DOKUMENTACIJA.md), [Scenario odbrane](docs/ODBRANA.md), [Izveštaj provere](docs/TESTIRANJE.md).
+Detaljno: [Projektna dokumentacija](docs/PROJEKTNA_DOKUMENTACIJA.md), [Izveštaj provere](docs/TESTIRANJE.md).
 
 Tehnologije: Java 21, Spring Boot 3.5.16, Spring MVC, Thymeleaf, Spring Security, Spring Data JPA/Hibernate, Flyway, MySQL 8.4, H2, JUnit 5 i MockMvc. Verzija Jave je u podržanom opsegu iz [zvaničnih Spring Boot sistemskih zahteva](https://docs.spring.io/spring-boot/3.5/system-requirements.html).

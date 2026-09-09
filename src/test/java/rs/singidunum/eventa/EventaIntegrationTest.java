@@ -30,6 +30,7 @@ class EventaIntegrationTest {
     @Autowired AppUserRepository users;
     @Autowired VenueRepository venues;
     @Autowired CategoryRepository categories;
+    @Autowired OrganizerRepository organizers;
     @Autowired EventRepository events;
     @Autowired TicketTypeRepository types;
     @Autowired PurchaseOrderRepository orders;
@@ -43,7 +44,7 @@ class EventaIntegrationTest {
     }
 
     @BeforeEach void setup() {
-        tickets.deleteAll(); orders.deleteAll(); types.deleteAll(); events.deleteAll(); categories.deleteAll(); venues.deleteAll(); users.deleteAll();
+        tickets.deleteAll(); orders.deleteAll(); types.deleteAll(); events.deleteAll(); organizers.deleteAll(); categories.deleteAll(); venues.deleteAll(); users.deleteAll();
         buyer=account("buyer@test.rs","USER"); account("admin@test.rs","ADMIN"); account("other@test.rs","USER");
         venue=new Venue(); venue.setName("Test sala");venue.setAddress("Test adresa 1");venue.setCity("Beograd");venue.setCapacity(100);venues.save(venue);
         category=new Category();category.setName("Muzika");category.setDescription("Koncerti");categories.save(category);
@@ -191,6 +192,55 @@ class EventaIntegrationTest {
         assertThatThrownBy(() -> admin.save("orders",o.getId(),Map.of("status","PAID"),"admin@test.rs")).isInstanceOf(BusinessException.class);
         assertThatThrownBy(() -> booking.changeTicketStatus(t.getId(),"ACTIVE")).isInstanceOf(BusinessException.class);
         assertThatThrownBy(() -> admin.delete("users",users.findByEmail("admin@test.rs").orElseThrow().getId(),"admin@test.rs")).isInstanceOf(BusinessException.class);
+    }
+    private Organizer organizer(String name) {
+        admin.save("organizers",null,Map.of("name",name,"email","contact@test.rs"),"admin@test.rs");
+        return organizers.findAll().stream().filter(o -> o.getName().equals(name)).findFirst().orElseThrow();
+    }
+    @Test void manyToManySupportsSharedOrganizersAndSafeUnlinking() {
+        var first=organizer("Prvi organizator");var second=organizer("Drugi organizator");
+        admin.save("events",event.getId(),eventData("PUBLISHED"),"admin@test.rs",List.of(first.getId(),second.getId(),first.getId()));
+        admin.save("events",null,eventData("PUBLISHED"),"admin@test.rs",List.of(first.getId()));
+        var other=events.findAll().stream().filter(e -> !e.getId().equals(event.getId())).findFirst().orElseThrow();
+        assertThat(organizers.findByEventsIdOrderByNameAscIdAsc(event.getId())).hasSize(2);
+        assertThat(organizers.findByEventsIdOrderByNameAscIdAsc(other.getId())).extracting(Organizer::getId).containsExactly(first.getId());
+        assertThatThrownBy(() -> admin.delete("organizers",first.getId(),"admin@test.rs")).isInstanceOf(BusinessException.class);
+        admin.save("events",event.getId(),eventData("PUBLISHED"),"admin@test.rs",List.of());
+        admin.delete("organizers",second.getId(),"admin@test.rs");
+        admin.delete("events",other.getId(),"admin@test.rs");
+        assertThat(organizers.existsById(first.getId())).isTrue();
+        admin.delete("organizers",first.getId(),"admin@test.rs");
+        assertThat(organizers.count()).isZero();
+    }
+    @Test void organizerMvcFormsSaveMultipleSelectionsAndDisplayOnPublicEvent() throws Exception {
+        var first=organizer("Prvi organizator");var second=organizer("Drugi organizator");
+        for(String path:List.of("/admin/organizers","/admin/organizers/new","/admin/organizers/"+first.getId()+"/edit"))
+            mvc.perform(get(path).with(user("admin@test.rs").roles("ADMIN"))).andExpect(status().isOk());
+        var request=post("/admin/events/save").with(user("admin@test.rs").roles("ADMIN")).with(csrf())
+            .param("recordId",event.getId().toString()).param("organizerIds",first.getId().toString(),second.getId().toString());
+        eventData("PUBLISHED").forEach((k,v) -> request.param(k,v));
+        mvc.perform(request).andExpect(status().is3xxRedirection());
+        mvc.perform(get("/events/"+event.getId())).andExpect(content().string(org.hamcrest.Matchers.containsString("Prvi organizator"))).andExpect(content().string(org.hamcrest.Matchers.containsString("Drugi organizator")));
+        mvc.perform(get("/admin/events/"+event.getId()+"/edit").with(user("admin@test.rs").roles("ADMIN")))
+            .andExpect(status().isOk()).andExpect(model().attribute("selectedOrganizers",org.hamcrest.Matchers.containsInAnyOrder(first.getId(),second.getId())));
+        var clear=post("/admin/events/save").with(user("admin@test.rs").roles("ADMIN")).with(csrf()).param("recordId",event.getId().toString());
+        eventData("PUBLISHED").forEach((k,v) -> clear.param(k,v));
+        mvc.perform(clear).andExpect(status().is3xxRedirection());
+        assertThat(organizers.findByEventsIdOrderByNameAscIdAsc(event.getId())).isEmpty();
+    }
+    @Test void invalidOrganizerSelectionRollsBackAndValidationKeepsSelection() throws Exception {
+        var organizer=organizer("Organizator");
+        assertThatThrownBy(() -> admin.save("events",event.getId(),eventData("PUBLISHED"),"admin@test.rs",List.of(Long.MAX_VALUE)))
+            .isInstanceOf(BusinessException.class);
+        assertThat(events.findById(event.getId()).orElseThrow().getTitle()).isEqualTo("Test koncert");
+        mvc.perform(post("/admin/events/save").with(user("admin@test.rs").roles("ADMIN")).with(csrf())
+            .param("recordId",event.getId().toString()).param("organizerIds",organizer.getId().toString()))
+            .andExpect(status().isOk()).andExpect(model().attributeExists("error"))
+            .andExpect(model().attribute("selectedOrganizers",List.of(organizer.getId())));
+        admin.save("organizers",organizer.getId(),Map.of("name","Novi naziv","email","new@test.rs"),"admin@test.rs");
+        assertThat(organizers.findById(organizer.getId()).orElseThrow().getName()).isEqualTo("Novi naziv");
+        assertThatThrownBy(() -> admin.save("organizers",organizer.getId(),Map.of("name","Naziv","email","invalid"),"admin@test.rs"))
+            .isInstanceOf(BusinessException.class);
     }
     @Test void usedTicketRemainsInAuditEvenAfterEventCancellation() {
         var order=booking.purchase(buyer.getEmail(),type.getId(),1);

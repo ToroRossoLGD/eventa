@@ -67,6 +67,28 @@
             ponovo postati važeći. Provera ulaska dostupna je od 2 sata pre do
             12 sati posle početka događaja.
           </div>
+          <fieldset
+            th:if="${resource.key == 'events'}"
+            class="organizer-picker"
+          >
+            <legend>Organizatori</legend>
+            <p th:if="${organizers.isEmpty()}">
+              Najpre dodajte organizatora u evidenciji organizatora.
+            </p>
+            <label th:each="organizer:${organizers}">
+              <input
+                type="checkbox"
+                name="organizerIds"
+                th:value="${organizer.id}"
+                th:checked="${selectedOrganizers.contains(organizer.id)}"
+              />
+              <span th:text="${organizer.name}"></span>
+            </label>
+            <small
+              >Događaj može imati više organizatora. Isti organizator može
+              učestvovati na više događaja.</small
+            >
+          </fieldset>
           <div class="form-actions">
             <button class="button dark">Sačuvaj promene ↗</button
             ><a
