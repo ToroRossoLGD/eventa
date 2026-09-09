@@ -1,5 +1,84 @@
 const { test, expect } = require("@playwright/test");
 
+test("organizers can be assigned together and removed from an event", async ({
+  page,
+}) => {
+  const suffix = Date.now();
+  const names = [`Organizator A ${suffix}`, `Organizator B ${suffix}`];
+  const title = `Zajednički događaj ${suffix}`;
+  await page.goto("/login");
+  await page
+    .getByRole("textbox", { name: "Email adresa" })
+    .fill("admin@eventa.rs");
+  await page.getByLabel("Lozinka", { exact: true }).fill("Admin123!");
+  await page.getByRole("button", { name: "Prijavi se" }).click();
+  for (const name of names) {
+    await page.goto("/admin/organizers/new");
+    await page.getByRole("textbox", { name: "Naziv", exact: true }).fill(name);
+    await page
+      .getByRole("textbox", { name: "Email", exact: true })
+      .fill("organizer@eventa.test");
+    await page.getByRole("button", { name: "Sačuvaj promene" }).click();
+    await expect(page.getByRole("status")).toContainText("Promene su sačuvane");
+  }
+  await page.goto("/admin/events/new");
+  await page.getByRole("textbox", { name: "Naziv događaja" }).fill(title);
+  await page
+    .getByRole("textbox", { name: "Opis", exact: true })
+    .fill("Događaj sa dva organizatora.");
+  await page.locator('[name="startsAt"]').fill("2030-10-10T19:00");
+  for (const label of ["Lokacija", "Kategorija", "Vizuelni stil", "Status"]) {
+    await page
+      .getByRole("combobox", { name: label, exact: true })
+      .selectOption({ index: 1 });
+  }
+  for (const name of names)
+    await page.getByRole("checkbox", { name, exact: true }).check();
+  await page.screenshot({
+    path: "artifacts/organizers-form.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Sačuvaj promene" }).click();
+  await expect(page.getByRole("status")).toContainText("Promene su sačuvane");
+  const row = page.getByRole("row").filter({ hasText: title });
+  const editUrl = await row
+    .getByRole("link", { name: "Izmeni" })
+    .getAttribute("href");
+  const eventId = editUrl.split("/")[3];
+  await page.goto(`/events/${eventId}`);
+  for (const name of names)
+    await expect(page.locator(".event-organizers")).toContainText(name);
+  await page.goto(editUrl);
+  for (const name of names)
+    await expect(
+      page.getByRole("checkbox", { name, exact: true }),
+    ).toBeChecked();
+  await page.getByRole("checkbox", { name: names[1], exact: true }).uncheck();
+  await page.getByRole("button", { name: "Sačuvaj promene" }).click();
+  await expect(page.getByRole("status")).toContainText("Promene su sačuvane");
+  await page.goto(`/events/${eventId}`);
+  await expect(page.locator(".event-organizers")).toContainText(names[0]);
+  await expect(page.locator(".event-organizers")).not.toContainText(names[1]);
+  await page.goto("/admin/events");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page
+    .getByRole("row")
+    .filter({ hasText: title })
+    .getByRole("button", { name: "Obriši" })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Zapis je obrisan");
+  for (const name of names) {
+    await page.goto("/admin/organizers");
+    page.once("dialog", (dialog) => dialog.accept());
+    await page
+      .getByRole("row")
+      .filter({ hasText: name })
+      .getByRole("button", { name: "Obriši" })
+      .click();
+    await expect(page.getByRole("status")).toContainText("Zapis je obrisan");
+  }
+});
+
 test("desktop and phone catalog are usable and have no horizontal overflow", async ({
   page,
 }) => {

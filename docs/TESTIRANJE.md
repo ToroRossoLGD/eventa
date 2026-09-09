@@ -8,10 +8,10 @@ Test klasa: `src/test/java/rs/singidunum/eventa/EventaIntegrationTest.java`.
 
 | Okruženje | Rezultat |
 |---|---|
-| Java 21, Spring Boot 3.5.16, H2 2.3, test profil | 21 test prošao, 0 neuspešnih, 0 grešaka |
-| Java 21, Spring Boot 3.5.16, MySQL 8.4 u Docker-u, posebna `eventa_test` baza | 21 test prošao, 0 neuspešnih, 0 grešaka |
+| Java 21, Spring Boot 3.5.16, H2 2.3, test profil | 24 testa prošla, 0 neuspešnih, 0 grešaka |
+| Java 21, Spring Boot 3.5.16, MySQL 8.4 u Docker-u, posebna `eventa_test` baza | 24 testa prošla, 0 neuspešnih, 0 grešaka |
 | Docker Compose: izgradnja aplikacije i pokretanje sa MySQL | Uspešno; aplikacija dostupna na localhost:8080 |
-| Chromium, aplikacija u Docker-u sa MySQL bazom | 3 E2E testa prošla |
+| Chromium, aplikacija u Docker-u sa MySQL bazom | 4 E2E testa prošla |
 
 Provereno:
 
@@ -36,6 +36,9 @@ Provereno:
 19. Neispravne administratorske vrednosti, očuvanje formulara, HTTP 400 i 404.
 20. Zabrana reaktivacije otkazanih zapisa i brisanja sopstvenog administratora.
 21. Očuvanje iskorišćene ulaznice u evidenciji i nakon otkazivanja celog događaja.
+22. ManyToMany deljenje organizatora između događaja, uklanjanje veza i bezbedno brisanje.
+23. Administratorski CRUD organizatora, slanje više izabranih vrednosti kroz MVC formu i javni prikaz organizatora.
+24. Odbijanje nepostojećeg organizatora uz rollback, očuvanje izbora posle greške forme i validacija kontakta.
 
 Konkurentni testovi koriste dve niti, zajedničku startnu barijeru i posebne transakcije. Ne predstavljaju test velikog opterećenja. Sat u integracionim testovima je fiksiran, pa vremenski testovi ne zavise od dana pokretanja.
 
@@ -48,6 +51,7 @@ Testovi: `tests/e2e/eventa.spec.js`. Playwright 1.60.0.
 - Registracija novog naloga, stvarna forma prijave, izbor dve ulaznice, iznos, kupovina, prikaz kodova i print CSS.
 - Otkazivanje porudžbine i statusi ulaznica.
 - Kontrolna tabla, kreiranje/izmena/brisanje probne kategorije i odbijanje nepostojećeg koda na ulazu.
+- Kreiranje dva organizatora, dodela oba istom događaju, čuvanje izbora pri izmeni, javni prikaz, uklanjanje jedne veze i brisanje probnih zapisa.
 
 Snimci ekrana kataloga, administracije i štampe vizuelno su pregledani. Izveštaj i snimci generišu se u `artifacts/`. Ugrađeni pregledač nije mogao da se poveže zbog greške alata; provera je izvršena u lokalnom Chromium-u kroz Playwright.
 

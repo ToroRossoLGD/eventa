@@ -20,6 +20,7 @@ public class AdminController {
     private final PurchaseOrderRepository orders;
     private final TicketRepository tickets;
     private final AppUserRepository users;
+    private final OrganizerRepository organizers;
 
     @ModelAttribute("resources") Object resources() { return admin.resources(); }
     @GetMapping({"", "/"}) String dashboard(Model model) {
@@ -39,14 +40,20 @@ public class AdminController {
         model.addAttribute("resource",admin.resource(key)); model.addAttribute("headers",admin.headers(key)); model.addAttribute("rows",admin.rows(key)); return "admin/list";
     }
     private String form(String key,Long id,Model model) {
+        if (key.equals("events")) {
+            model.addAttribute("organizers",organizers.findAllByOrderByNameAscIdAsc());
+            model.addAttribute("selectedOrganizers",id == null ? List.of() : organizers.findByEventsIdOrderByNameAscIdAsc(id).stream().map(o -> o.getId()).toList());
+        }
         model.addAttribute("resource",admin.resource(key)); model.addAttribute("recordId",id); model.addAttribute("fields",admin.fields(key,id)); return "admin/form";
     }
     @GetMapping("/{key}/new") String create(@PathVariable String key,Model model) { return form(key,null,model); }
     @GetMapping("/{key}/{id}/edit") String edit(@PathVariable String key,@PathVariable Long id,Model model) { return form(key,id,model); }
-    @PostMapping("/{key}/save") String save(@PathVariable String key,@RequestParam(required=false) Long recordId,@RequestParam Map<String,String> data,Principal principal,Model model,RedirectAttributes flash) {
-        try { admin.save(key,recordId,data,principal.getName()); }
+    @PostMapping("/{key}/save") String save(@PathVariable String key,@RequestParam(required=false) Long recordId,@RequestParam Map<String,String> data,@RequestParam(required=false) List<Long> organizerIds,Principal principal,Model model,RedirectAttributes flash) {
+        List<Long> selected = organizerIds == null ? List.of() : organizerIds;
+        try { admin.save(key,recordId,data,principal.getName(),selected); }
         catch(BusinessException|DataIntegrityViolationException e) {
             form(key,recordId,model);
+            model.addAttribute("selectedOrganizers",selected);
             model.addAttribute("fields",admin.fields(key,recordId).stream().map(f -> new AdminService.Field(f.name(),f.label(),f.type(),f.type().equals("password")?"":data.getOrDefault(f.name(),f.value()),f.options(),f.required(),f.hint())).toList());
             model.addAttribute("error",e instanceof BusinessException?e.getMessage():"Podaci su već zauzeti ili povezani sa drugim zapisima.");
             return "admin/form";

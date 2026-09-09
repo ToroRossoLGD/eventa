@@ -3,14 +3,14 @@
 **Predmet:** Internet softverske arhitekture  
 **Tema:** Sistem za organizaciju događaja i prodaju ulaznica — Eventa  
 **Vrsta realizacije:** Spring MVC aplikacija sa CRUD operacijama i relacionom bazom  
-**Autor i broj indeksa:** dopuniti pre predaje  
+**Autor i broj indeksa:** Uroš Jović 2021/203641
 **Godina:** 2026.
 
 ## 1. Cilj i obim
 
 Eventa povezuje pregled ponude događaja sa izdavanjem i kontrolom ulaznica. Posetilac pronalazi događaj, bira tip ulaznice i količinu, potvrđuje simuliranu kupovinu i dobija jedinstvene kodove. Administrator održava program, cene, kapacitete i evidenciju kupovina, a na ulazu proverava kod posetioca.
 
-Projekat realizuje Spring MVC varijantu iz ispitnog uputstva. Ima sedam poslovnih tabela, CRUD za svaku, korisnički interfejs i projektnu dokumentaciju. Aplikacija je slojeviti monolit: jedan proces, jedna baza i serverski generisane HTML stranice. Mikroservisi nisu izabrana varijanta ovog projekta.
+Projekat realizuje Spring MVC varijantu iz ispitnog uputstva. Ima osam poslovnih tabela i spojnu tabelu `event_organizers`, CRUD za svaku, korisnički interfejs i projektnu dokumentaciju. Aplikacija je slojeviti monolit: jedan proces, jedna baza i serverski generisane HTML stranice. Mikroservisi nisu izabrana varijanta ovog projekta.
 
 Stvarno kartično plaćanje, slanje emaila, numerisana sedišta, povraćaj novca preko banke i skeniranje QR koda kamerom nisu deo obima. Plaćanje se simulira, a kontrola ulaska koristi tekstualni UUID kod.
 
@@ -67,8 +67,8 @@ flowchart TD
 | Prezentacija | `templates`, `static` | HTML prikaz, stilovi, klijentski obračun pregleda iznosa |
 | MVC | `PublicController`, `AdminController`, `ViewAdvice` | HTTP parametri, model, izbor pogleda i preusmeravanje |
 | Servisi | `BookingService`, `AdminService`, `AccountService` | Pravila, transakcije, autorizacija vlasništva i izračunavanje |
-| Pristup podacima | Sedam `JpaRepository` interfejsa | Upiti, čuvanje, brojanje i zaključavanje |
-| Domen | `AppUser`, `Venue`, `Category`, `Event`, `TicketType`, `PurchaseOrder`, `Ticket` | Mapiranje sedam poslovnih tabela |
+| Pristup podacima | Osam `JpaRepository` interfejsa | Upiti, čuvanje, brojanje i zaključavanje |
+| Domen | `AppUser`, `Venue`, `Category`, `Event`, `TicketType`, `PurchaseOrder`, `Ticket`, `Organizer` | Mapiranje osam poslovnih tabela i ManyToMany veze |
 | Konfiguracija | `SecurityConfig`, `DemoData`, properties | Prijava, dozvole, profili, početni podaci |
 
 Spring ubrizgava zavisnosti konstruktorima. Lombok generiše pristupne metode i konstruktore da se izbegne ponavljanje. Entiteti ne sadrže HTML, kontroleri ne izvršavaju SQL, a transakcione operacije nalaze se u servisima. `AdminService` opisuje polja administracije metapodacima, dok svaku izmenu obrađuje posebno prema tipu entiteta.
@@ -79,6 +79,17 @@ MVC model sadrži podatke za prikaz. Thymeleaf obrađuje model u HTML na serveru
 
 ```mermaid
 erDiagram
+    EVENTS ||--o{ EVENT_ORGANIZERS : ima
+    ORGANIZERS ||--o{ EVENT_ORGANIZERS : ucestvuje
+    ORGANIZERS {
+        bigint id PK
+        varchar name
+        varchar email
+    }
+    EVENT_ORGANIZERS {
+        bigint event_id PK,FK
+        bigint organizer_id PK,FK
+    }
     APP_USERS ||--o{ ORDERS : kupuje
     VENUES ||--o{ EVENTS : odrzava_se
     CATEGORIES ||--o{ EVENTS : klasifikuje
@@ -140,7 +151,7 @@ erDiagram
     }
 ```
 
-Sve veze su modelovane pomoću stranih ključeva i JPA `@ManyToOne`. Primarni ključevi su automatski generisani. SQL `CHECK` ograničenja proveravaju dozvoljene statuse, pozitivne kapacitete i nenegativne cene. Jedinstveni indeksi postoje za email, naziv kategorije i kod ulaznice. Dodatni indeksi pomažu pretragu po terminu, korisniku porudžbine i tipu/statusu ulaznice.
+Veze prema korisniku, događaju, lokaciji, kategoriji i tipu ulaznice koriste `@ManyToOne`. Događaj i organizator imaju dvosmernu `@ManyToMany` vezu. `Event.organizers` je vlasnik veze sa `@JoinTable`, a `Organizer.events` koristi `mappedBy="organizers"`. Spojna tabela `event_organizers` ima složeni primarni ključ `(event_id, organizer_id)` i dva strana ključa, pa isti par ne može biti upisan dvaput. Nema kaskadnog brisanja organizatora: brisanje događaja uklanja njegove veze, a deljeni organizatori ostaju. Organizatori se učitavaju posebnim upitom za javni prikaz i administrativni izbor, bez uključivanja Open Session in View. Primarni ključevi su automatski generisani. SQL `CHECK` ograničenja proveravaju dozvoljene statuse, pozitivne kapacitete i nenegativne cene. Jedinstveni indeksi postoje za email, naziv kategorije i kod ulaznice. Dodatni indeksi pomažu pretragu po terminu, korisniku porudžbine i tipu/statusu ulaznice.
 
 `TicketType.quantity` označava ukupno raspoređeni kapacitet tipa, a ne preostalu količinu. Preostalo se računa kao:
 
@@ -216,7 +227,7 @@ Postojeće prijavljene sesije zadržavaju svoja ovlašćenja do sledeće prijave
 | POST | `/admin/{key}/{id}/delete` | Brisanje | Administrator |
 | GET/POST | `/admin/check-in` | Provera i evidencija ulaska | Administrator |
 
-`key` uzima jednu od vrednosti `users`, `venues`, `categories`, `events`, `types`, `orders`, `tickets`. Rute vraćaju HTML i preusmeravanja; projekat ne predstavlja REST API implementaciju.
+`key` uzima jednu od vrednosti `users`, `venues`, `categories`, `events`, `types`, `orders`, `tickets`, `organizers`. Rute vraćaju HTML i preusmeravanja; projekat ne predstavlja REST API implementaciju.
 
 ## 8. Korisnički interfejs
 
