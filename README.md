@@ -1,53 +1,59 @@
 # Eventa
 
-Eventa je studentski projekat iz predmeta Internet softverske arhitekture — web aplikacija za pregled događaja i kupovinu ulaznica, napravljena u Javi i Spring Boot-u.
+Eventa is a web application for browsing events and buying tickets, built with Java and Spring Boot as a student project for the Internet Software Architectures course.
 
-Posetilac može da pronađe događaj, kupi ulaznice i sačuva ih za štampu. Administrator uređuje događaje i organizatore, prati porudžbine i proverava ulaznice na ulazu. Kupovina je demonstraciona, bez stvarne naplate.
+Visitors can find events, buy tickets and print them. Administrators manage events and organizers, track orders and check tickets at the entrance. Payments are simulated, so no real money is charged. The application interface is in Serbian.
 
-## Kako izgleda
+## Screenshots
 
-**Početna stranica** — katalog događaja sa pretragom i filterima po gradu i kategoriji.
+**Home page**
 
-![Početna stranica sa pretragom i katalogom događaja](docs/images/pocetna.png)
+The event catalog includes search and filters by city and category.
+
+![Home page with event search and catalog](docs/images/pocetna.png)
 
 <details>
-<summary>Administracija i izgled ulaznica</summary>
+<summary>Admin dashboard and tickets</summary>
 
-**Administracija** — pregled događaja, prodatih ulaznica, korisnika i poslednjih porudžbina.
+**Admin dashboard**
 
-![Administratorska kontrolna tabla](docs/images/administracija.png)
+An overview of events, ticket sales, registered users and recent orders.
 
-**Ulaznice za štampu** — svaka ulaznica ima podatke o događaju i jedinstveni kod za proveru ulaska. Iz pregledača se mogu sačuvati i kao PDF.
+![Admin dashboard](docs/images/administracija.png)
 
-![Porudžbina sa dve ulaznice pripremljene za štampu](docs/images/ulaznice-stampa.png)
+**Printable tickets**
+
+Each ticket contains event details and a unique code for entry checks. Tickets can also be saved as a PDF through the browser's print dialog.
+
+![An order with two tickets ready for printing](docs/images/ulaznice-stampa.png)
 
 </details>
 
-## Šta može da se radi
+## Features
 
-- Pretraga događaja i pregled lokacije, termina, organizatora i dostupnih tipova ulaznica.
-- Registracija, prijava i kupovina Standard ili VIP ulaznica.
-- Pregled svojih porudžbina, štampa ulaznica i otkazivanje pre početka događaja.
-- Dodavanje i izmena događaja, lokacija, kategorija, organizatora i tipova ulaznica kroz administraciju.
-- Upravljanje korisnicima, porudžbinama i ulaznicama.
-- Provera koda ulaznice i evidencija ulaska, uz sprečavanje ponovnog korišćenja iste ulaznice.
+- Search events and view venues, dates, organizers and available ticket types.
+- Create an account, sign in and buy Standard or VIP tickets.
+- View your orders, print tickets and cancel orders before the event starts.
+- Add and edit events, venues, categories, organizers and ticket types in the admin area.
+- Manage users, orders and tickets.
+- Check ticket codes and record entry, preventing the same ticket from being used twice.
 
-Pri kupovini se proveravaju raspoloživost i kapacitet, a cena se računa na serveru. Transakcije i zaključavanje sprečavaju da dva korisnika kupe poslednju raspoloživu ulaznicu. Jedan događaj može imati više organizatora, a isti organizator može učestvovati na više događaja.
+The server calculates prices and checks availability and capacity during checkout. Transactions and locking prevent two customers from buying the last available ticket. Events can have multiple organizers, and organizers can be linked to multiple events.
 
-## Tehnologije
+## Tech stack
 
-| Deo projekta | Tehnologije |
+| Area | Technologies |
 | --- | --- |
 | Backend | Java 21, Spring Boot, Spring MVC |
-| Korisnički interfejs | Thymeleaf, HTML, CSS, JavaScript |
-| Prijava i prava pristupa | Spring Security, BCrypt, sesije i CSRF zaštita |
-| Podaci | Spring Data JPA / Hibernate, MySQL, H2, Flyway |
-| Testovi | JUnit 5, MockMvc, Playwright |
-| Pokretanje | Maven, Docker Compose |
+| Frontend | Thymeleaf, HTML, CSS, JavaScript |
+| Authentication and access control | Spring Security, BCrypt, sessions and CSRF protection |
+| Data | Spring Data JPA / Hibernate, MySQL, H2, Flyway |
+| Testing | JUnit 5, MockMvc, Playwright |
+| Build and deployment | Maven, Docker Compose |
 
-## Pokretanje preko Dockera
+## Run with Docker
 
-Potreban je instaliran i pokrenut Docker Desktop.
+Install and start Docker Desktop, then run:
 
 ```sh
 git clone https://github.com/ToroRossoLGD/eventa.git
@@ -55,62 +61,62 @@ cd eventa
 docker compose up --build -d
 ```
 
-Ako je projekat već preuzet, pokreni poslednju komandu iz njegovog foldera. Prva izgradnja traje nešto duže zbog preuzimanja biblioteka i Docker slika.
+If you already have the repository, run the last command from the project folder. The first build takes longer while Docker images and dependencies are downloaded.
 
-Aplikacija se otvara na **[localhost:8080](http://localhost:8080)**. Compose pokreće aplikaciju i MySQL bazu, a pri prvom pokretanju se dodaju demo događaji i nalozi.
+Open **[localhost:8080](http://localhost:8080)**. Compose starts the application and MySQL. Demo events and accounts are created on the first run.
 
-| Uloga | Email | Lozinka |
+| Role | Email | Password |
 | --- | --- | --- |
 | Administrator | `admin@eventa.rs` | `Admin123!` |
-| Posetilac | `ana@eventa.rs` | `Posetilac123!` |
+| Visitor | `ana@eventa.rs` | `Posetilac123!` |
 
-Za kratak obilazak prijavi se kao posetilac, izaberi događaj i kupi ulaznicu. Zatim se prijavi kao administrator i pogledaj porudžbinu i kontrolnu tablu.
+To try the main flow, sign in as a visitor, choose an event and buy a ticket. Then sign in as the administrator to see the order and dashboard.
 
-Korisne komande:
+Useful commands:
 
 ```sh
-docker compose logs -f app  # Logovi aplikacije
-docker compose stop        # Zaustavljanje
-docker compose up -d       # Ponovno pokretanje
+docker compose logs -f app  # View application logs
+docker compose stop        # Stop the containers
+docker compose up -d       # Start them again
 ```
 
-Podaci ostaju sačuvani u Docker volume-u i nakon `docker compose down`. MySQL je dostupan na `localhost:3307`, sa bazom i korisnikom `eventa`. Podrazumevana lokalna lozinka je `eventa_local_demo`; lozinke se mogu podesiti promenljivama `DB_PASSWORD` i `DB_ROOT_PASSWORD`.
+Data is stored in a Docker volume and is kept after `docker compose down`. MySQL is available at `localhost:3307`, with `eventa` as both the database name and username. The default local password is `eventa_local_demo`. You can set database passwords through `DB_PASSWORD` and `DB_ROOT_PASSWORD`.
 
-Ako je port 8080 zauzet, zaustavi drugu aplikaciju ili promeni mapiranje u [compose.yaml](compose.yaml). Ako pri prvom pokretanju aplikacija prijavi da ne može da se poveže sa bazom, sačekaj da MySQL završi inicijalizaciju i pokreni `docker compose up -d app`.
+If port 8080 is busy, stop the other application or change the port mapping in [compose.yaml](compose.yaml). If the application cannot connect to the database on the first run, wait for MySQL to finish initializing and run `docker compose up -d app`.
 
 <details>
-<summary>Pokretanje bez Dockera</summary>
+<summary>Run without Docker</summary>
 
-Uz instalirane Java 21 i Maven 3.9+:
+With Java 21 and Maven 3.9+ installed:
 
 ```sh
 mvn spring-boot:run
 ```
 
-Podrazumevani profil koristi H2 bazu i čuva podatke u folderu `data/`. Adresa i demo nalozi su isti kao u Docker varijanti.
+The default profile uses H2 and stores data in the `data/` folder. The URL and demo accounts are the same as for Docker.
 
-Na Windows-u možeš koristiti i skripte koje pripremaju Javu i Maven u lokalnom folderu `.tools/`, bez promene sistemskog PATH-a:
+On Windows, these scripts can set up Java and Maven in the local `.tools/` folder without changing the system PATH:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/bootstrap.ps1
 powershell -ExecutionPolicy Bypass -File scripts/start.ps1
 ```
 
-Aplikacija se zaustavlja sa `Ctrl+C` u terminalu. Nemoj istovremeno pokretati lokalnu i Docker varijantu na istom portu.
+Press `Ctrl+C` in the terminal to stop the application. The local and Docker versions need different ports if you want to run both at once.
 
 </details>
 
-## Testovi
+## Tests
 
-Integracioni testovi proveravaju kupovinu, obračun cene, prava pristupa, otkazivanje, proveru ulaska i istovremene zahteve za poslednju ulaznicu.
+Integration tests cover purchases, price calculations, access control, cancellations, entry checks and concurrent requests for the last available ticket.
 
 ```sh
 mvn -B verify
 ```
 
-Na Windows-u je dostupan i lokalni pokretač `mvnw.cmd`: `.\mvnw.cmd -B verify` (koristi Maven iz `.tools/` ili sistemskog PATH-a).
+On Windows, you can also run `.\mvnw.cmd -B verify`. This project script uses Maven from `.tools/` or the system PATH.
 
-Za testove u pregledaču potrebni su Node.js i pokrenuta demo aplikacija:
+Browser tests require Node.js and a running demo instance:
 
 ```sh
 npm ci
@@ -118,27 +124,27 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright testovi koriste demo naloge i kreiraju probne podatke. Za integracione testove sa MySQL-om koristi se posebna test baza, jer testovi brišu njene poslovne podatke. Detalji i prethodni rezultati nalaze se u [izveštaju testiranja](docs/TESTIRANJE.md).
+Playwright tests use demo accounts and create test data. MySQL integration tests require a separate test database because they delete its application data. See the [testing report](docs/TESTIRANJE.md) for details and previous results. The report is in Serbian.
 
-## Organizacija koda
+## Project structure
 
 ```text
 src/main/java/rs/singidunum/eventa/
-├── config/       Podešavanja bezbednosti i demo podaci
-├── domain/       JPA entiteti
-├── repository/   Pristup bazi
-├── service/      Poslovna logika
-└── web/          MVC kontroleri i forme
+  config/         Security configuration and demo data
+  domain/         JPA entities
+  repository/     Database access
+  service/        Business logic
+  web/            MVC controllers and forms
 
 src/main/resources/
-├── db/migration/ Flyway migracije
-├── templates/    Thymeleaf stranice
-└── static/       CSS, JavaScript i ilustracije
+  db/migration/   Flyway migrations
+  templates/      Thymeleaf pages
+  static/         CSS, JavaScript and illustrations
 
-src/test/         Integracioni testovi
-tests/e2e/        Testovi u pregledaču
-scripts/          Skripte za lokalno pokretanje
-docs/             Dokumentacija i snimci ekrana
+src/test/         Integration tests
+tests/e2e/        Browser tests
+scripts/          Local setup and startup scripts
+docs/             Documentation and screenshots
 ```
 
-Model baze, veze između entiteta i poslovna pravila opisani su u [projektnoj dokumentaciji](docs/PROJEKTNA_DOKUMENTACIJA.md).
+The [project documentation](docs/PROJEKTNA_DOKUMENTACIJA.md) describes the database model, entity relationships and business rules in Serbian.
