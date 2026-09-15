@@ -55,7 +55,7 @@
             >6 događaja u najavi</span
           >
         </div>
-        <form class="search-bar" th:action="@{/events}" method="get">
+        <form id="event-search" class="search-bar" th:action="@{/events}" method="get">
           <label class="search-input"
             ><span>⌕</span
             ><input
@@ -85,15 +85,24 @@
           <a
             class="chip"
             th:classappend="${selectedCategory == null} ? 'selected'"
-            th:href="@{/events(q=${q},city=${selectedCity})}"
+            th:href="@{/events(q=${q},city=${selectedCity},sort=${selectedSort})}"
             >✳ &nbsp; Sve kategorije</a
           ><a
             class="chip"
             th:each="c:${categories}"
             th:text="${c.name}"
             th:classappend="${c.id == selectedCategory} ? 'selected'"
-            th:href="@{/events(category=${c.id},q=${q},city=${selectedCity})}"
+            th:href="@{/events(category=${c.id},q=${q},city=${selectedCity},sort=${selectedSort})}"
           ></a>
+        </div>
+        <div class="catalog-sort">
+          <label for="event-sort">Poređaj događaje</label>
+          <select id="event-sort" name="sort" form="event-search">
+            <option value="date" th:selected="${selectedSort == 'date'}">Najskoriji prvo</option>
+            <option value="priceAsc" th:selected="${selectedSort == 'priceAsc'}">Najjeftiniji prvo</option>
+            <option value="priceDesc" th:selected="${selectedSort == 'priceDesc'}">Najskuplji prvo</option>
+          </select>
+          <button class="button outline" type="submit" form="event-search">Primeni</button>
         </div>
         <div class="event-grid" th:if="${!cards.isEmpty()}">
           <a

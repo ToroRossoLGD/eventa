@@ -61,6 +61,34 @@ class EventaIntegrationTest {
         mvc.perform(get("/events/"+event.getId())).andExpect(status().isOk());
         mvc.perform(get("/login")).andExpect(status().isOk()); mvc.perform(get("/register")).andExpect(status().isOk());
     }
+    @Test void catalogSortsByPriceAndDateAndPreservesFilters() throws Exception {
+        Event later = new Event();
+        later.setTitle("Later concert"); later.setDescription("Another concert");
+        later.setVenue(venue); later.setCategory(category);
+        later.setStartsAt(event.getStartsAt().plusDays(1));
+        later.setTheme("blue"); later.setStatus("PUBLISHED"); events.save(later);
+        TicketType cheaper = new TicketType(); cheaper.setEvent(later); cheaper.setName("Standard");
+        cheaper.setPrice(new BigDecimal("500")); cheaper.setQuantity(10); types.save(cheaper);
+
+        for (String sort : List.of("date", "priceAsc", "priceDesc", "unknown")) {
+            var result = mvc.perform(get("/events").param("sort", sort).param("city", "Beograd")
+                    .param("category", category.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("selectedSort", sort.equals("unknown") ? "date" : sort))
+                .andReturn();
+            @SuppressWarnings("unchecked")
+            var cards = (List<rs.singidunum.eventa.web.PublicController.EventCard>)
+                result.getModelAndView().getModel().get("cards");
+            assertThat(cards).extracting(c -> c.event().getId()).containsExactlyElementsOf(
+                sort.equals("priceAsc") ? List.of(later.getId(), event.getId()) : List.of(event.getId(), later.getId()));
+            assertThat(result.getResponse().getContentAsString()).contains("name=\"sort\"", "sort=" + (sort.equals("unknown") ? "date" : sort));
+        }
+        mvc.perform(get("/events").param("sort", "priceAsc").param("q", "Later"))
+            .andExpect(status().isOk()).andExpect(model().attribute("cards", org.hamcrest.Matchers.hasSize(1)));
+        mvc.perform(get("/events").param("sort", "priceDesc").param("city", "Missing city"))
+            .andExpect(status().isOk()).andExpect(model().attribute("cards", org.hamcrest.Matchers.hasSize(0)));
+    }
+
     @Test void securityProtectsAdminCheckoutAndCsrf() throws Exception {
         mvc.perform(get("/admin")).andExpect(status().is3xxRedirection());
         mvc.perform(get("/checkout/"+type.getId())).andExpect(status().is3xxRedirection());

@@ -1705,6 +1705,23 @@ td strong {
     padding: 22px;
   }
 }
+.catalog-sort {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.catalog-sort select {
+  width: auto;
+  max-width: 100%;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fffefa;
+  color: var(--ink);
+}
 @media print {
   body {
     background: white;
