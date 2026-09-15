@@ -35,14 +35,23 @@ public class PublicController {
 
     @GetMapping({"/", "/events"})
     String home(@RequestParam(defaultValue="") String q, @RequestParam(required=false) Long category,
-                @RequestParam(defaultValue="") String city, Model model) {
+                @RequestParam(defaultValue="") String city, @RequestParam(defaultValue="date") String sort, Model model) {
         List<Event> available = events.findAllByOrderByStartsAtAsc().stream().filter(booking::onSale).toList();
         String search = q.strip().toLowerCase(Locale.ROOT);
+        String selectedSort = Set.of("date", "priceAsc", "priceDesc").contains(sort) ? sort : "date";
+        Comparator<EventCard> byDate = Comparator.comparing((EventCard c) -> c.event().getStartsAt())
+            .thenComparing(c -> c.event().getId());
+        Comparator<EventCard> ordering = switch (selectedSort) {
+            case "priceAsc" -> Comparator.comparing(EventCard::price).thenComparing(byDate);
+            case "priceDesc" -> Comparator.comparing(EventCard::price).reversed().thenComparing(byDate);
+            default -> byDate;
+        };
+        model.addAttribute("selectedSort", selectedSort);
         model.addAttribute("cards", available.stream()
             .filter(e -> category==null || e.getCategory().getId().equals(category))
             .filter(e -> city.isBlank() || e.getVenue().getCity().equals(city))
             .filter(e -> (e.getTitle()+" "+e.getDescription()+" "+e.getVenue().getName()).toLowerCase(Locale.ROOT).contains(search))
-            .map(this::card).toList());
+            .map(this::card).sorted(ordering).toList());
         model.addAttribute("categories",categories.findAll());
         model.addAttribute("cities",available.stream().map(e -> e.getVenue().getCity()).distinct().sorted().toList());
         model.addAttribute("eventCount",available.size());

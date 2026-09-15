@@ -32,6 +32,7 @@ Each ticket contains event details and a unique code for entry checks. Tickets c
 ## Features
 
 - Search events and view venues, dates, organizers and available ticket types.
+- Sort events by date or starting ticket price, with your search and category filters preserved.
 - Create an account, sign in and buy Standard or VIP tickets.
 - View your orders, print tickets and cancel orders before the event starts.
 - Add and edit events, venues, categories, organizers and ticket types in the admin area.
